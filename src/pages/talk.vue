@@ -9,7 +9,7 @@ const getText  = ()=> {
 
 <template>
   <div class="flex justify-center align-center w-[100vw] h-[100vh]">
-    <input class="w-full h-full px-[2ch] box-border" placeholder="关注桐桐桐桐魚，关注桐桐桐桐魚谢谢喵！" v-model="text" @keydown.enter="getText"/>
+    <input class="w-full h-full px-[2ch] box-border border-none focus:border-none outline-none" placeholder="关注桐桐桐桐魚，关注桐桐桐桐魚谢谢喵！" v-model="text" @keydown.enter="getText"/>
   </div>
 </template>
 

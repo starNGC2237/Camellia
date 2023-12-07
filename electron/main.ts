@@ -1,7 +1,6 @@
 import { app, BrowserWindow } from 'electron'
 import path from 'node:path';
-const http = require('http');
-
+const httpServer = require("http-server");
 // The built directory structure
 //
 // ├─┬─┬ dist
@@ -62,13 +61,9 @@ app.on('activate', () => {
   }
 })
 
-const server = http.createServer((_:any, res:any) => {
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
-  res.end('Hello World!');
-});
-
+const server = httpServer.createServer({root:path.join(__dirname, '../dist-frontend')});
 server.listen(9999, () => {
   console.log(`Server running at http://localhost:${9999}/`);
 });
+
 app.whenReady().then(createWindow)
