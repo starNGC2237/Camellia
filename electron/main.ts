@@ -1,6 +1,6 @@
-import { app, BrowserWindow } from 'electron'
-import path from 'node:path';
-const httpServer = require("http-server");
+import {app, BrowserWindow} from 'electron'
+import path from 'node:path'
+const liveServer = require('live-server')
 // The built directory structure
 //
 // ├─┬─┬ dist
@@ -11,8 +11,9 @@ const httpServer = require("http-server");
 // │ │ └── preload.js
 // │
 process.env.DIST = path.join(__dirname, '../dist')
-process.env.VITE_PUBLIC = app.isPackaged ? process.env.DIST : path.join(process.env.DIST, '../public')
-
+process.env.VITE_PUBLIC = app.isPackaged
+  ? process.env.DIST
+  : path.join(process.env.DIST, '../public')
 
 let win: BrowserWindow | null
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
@@ -20,8 +21,8 @@ const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
 
 function createWindow() {
   win = new BrowserWindow({
-    width:800,
-    height:90,
+    width: 800,
+    height: 90,
     resizable: false,
     icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
     webPreferences: {
@@ -31,7 +32,7 @@ function createWindow() {
 
   // Test active push message to Renderer-process.
   win.webContents.on('did-finish-load', () => {
-    win?.webContents.send('main-process-message', (new Date).toLocaleString())
+    win?.webContents.send('main-process-message', new Date().toLocaleString())
   })
 
   if (VITE_DEV_SERVER_URL) {
@@ -40,7 +41,7 @@ function createWindow() {
     // win.loadFile('dist/index.html')
     win.loadFile(path.join(process.env.DIST, 'index.html'))
   }
-  win.setMenu(null);
+  win.setMenu(null)
 }
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -61,9 +62,13 @@ app.on('activate', () => {
   }
 })
 
-const server = httpServer.createServer({root:path.join(__dirname, '../dist-frontend')});
-server.listen(9999, () => {
-  console.log(`Server running at http://localhost:${9999}/`);
-});
-
 app.whenReady().then(createWindow)
+
+const params = {
+  port: 9999, // Set the server port. Defaults to 8080.
+  host: '0.0.0.0', // Set the address to bind to. Defaults to 0.0.0.0 or process.env.IP.
+  // root: './dist-frontend',
+  root: app.isPackaged ? './resources/dist-frontend' : './dist-frontend', // Set root directory that's being served. Defaults to cwd.
+  open: true, // When false, it won't load your browser by default.
+}
+liveServer.start(params)

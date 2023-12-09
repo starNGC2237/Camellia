@@ -1,17 +1,19 @@
-import { defineConfig } from 'vite'
+import {defineConfig} from 'vite'
 import path from 'node:path'
 import electron from 'vite-plugin-electron/simple'
 import vue from '@vitejs/plugin-vue'
+import eslintPlugin from 'vite-plugin-eslint'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    resolve: {
-        alias: {
-            "@": path.resolve("./src"), // 相对路径别名配置，使用 @ 代替 src
-        },
+  resolve: {
+    alias: {
+      '@': path.resolve('./src'), // 相对路径别名配置，使用 @ 代替 src
     },
+  },
   plugins: [
     vue(),
+    eslintPlugin(),
     electron({
       main: {
         // Shortcut of `build.lib.entry`.
