@@ -26,3 +26,4 @@ release
 *.sw?
 
 frontend/node_modules
+dist-frontend/
