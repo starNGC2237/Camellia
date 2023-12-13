@@ -1,7 +1,7 @@
 {
   "name": "electron-vite-project",
   "private": true,
-  "version": "0.0.2",
+  "version": "v0.0.2",
   "scripts": {
     "dev": "vite",
     "dev_with_forntend": "cd ./frontend && pnpm run build && cd ../ && vite",
