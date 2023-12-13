@@ -2,7 +2,9 @@
 import {ref} from 'vue'
 
 let text = ref('')
-const getText = () => {
+const getText = async () => {
+  const response = await window.ipcRenderer.invoke('ping', text.value)
+  console.log(response)
   text.value = ''
 }
 </script>

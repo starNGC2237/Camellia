@@ -1,9 +1,10 @@
 {
   "name": "electron-vite-project",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "scripts": {
-    "dev": "cd ./frontend && pnpm run build && cd ../ && vite",
+    "dev": "vite",
+    "dev_with_forntend": "cd ./frontend && pnpm run build && cd ../ && vite",
     "build": "vue-tsc && vite build && electron-builder",
     "build:win": "vue-tsc && vite build && electron-builder --win",
     "build:mac": "vue-tsc && vite build && electron-builder --mac",
@@ -12,7 +13,9 @@
     "lint": "eslint --ext .js,.ts,.vue src"
   },
   "dependencies": {
+    "electron-log": "^5.0.1",
     "live-server": "^1.2.2",
+    "socket.io": "^4.7.2",
     "vue": "^3.3.4",
     "vue-router": "4",
     "vuetify": "^3.4.5"

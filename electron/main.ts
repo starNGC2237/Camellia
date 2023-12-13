@@ -1,6 +1,15 @@
-import {app, BrowserWindow} from 'electron'
+import {app, BrowserWindow, ipcMain} from 'electron'
 import path from 'node:path'
 const liveServer = require('live-server')
+const server = require('http').createServer()
+//将HTTP服务器注入到WebSocket服务器
+const IO = require('socket.io')(server, {
+  cors: {
+    origin: '*',
+  },
+})
+//指定HTTP的监听端口
+server.listen(5000)
 // The built directory structure
 //
 // ├─┬─┬ dist
@@ -30,6 +39,10 @@ function createWindow() {
     },
   })
 
+  ipcMain.handle('ping', (_, text) => {
+    IO.emit('b_message', text)
+    return 'pong'
+  })
   // Test active push message to Renderer-process.
   win.webContents.on('did-finish-load', () => {
     win?.webContents.send('main-process-message', new Date().toLocaleString())
@@ -63,7 +76,6 @@ app.on('activate', () => {
 })
 
 app.whenReady().then(createWindow)
-
 const params = {
   port: 9999, // Set the server port. Defaults to 8080.
   host: '0.0.0.0', // Set the address to bind to. Defaults to 0.0.0.0 or process.env.IP.
