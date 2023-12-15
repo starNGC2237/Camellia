@@ -3,7 +3,8 @@ import {ref} from 'vue'
 
 let text = ref('')
 const getText = async () => {
-  const response = await window.ipcRenderer.invoke('ping', text.value)
+  if (!text.value) return
+  const response = await window.ipcRenderer.invoke('text_message', text.value)
   console.log(response)
   text.value = ''
 }

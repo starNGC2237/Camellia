@@ -1,15 +1,8 @@
 import {app, BrowserWindow, ipcMain} from 'electron'
 import path from 'node:path'
+const Logger = require('electron-log')
 const liveServer = require('live-server')
-const server = require('http').createServer()
-//将HTTP服务器注入到WebSocket服务器
-const IO = require('socket.io')(server, {
-  cors: {
-    origin: '*',
-  },
-})
-//指定HTTP的监听端口
-server.listen(5000)
+
 // The built directory structure
 //
 // ├─┬─┬ dist
@@ -27,8 +20,11 @@ process.env.VITE_PUBLIC = app.isPackaged
 let win: BrowserWindow | null
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
+let httpServer: any
+let socketServer: any
 
 function createWindow() {
+  Logger.log('创建窗口')
   win = new BrowserWindow({
     width: 800,
     height: 90,
@@ -38,14 +34,34 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.js'),
     },
   })
+  // 隐藏菜单栏
+  win.setMenu(null)
+  // 创建Socket.IO服务器
+  if (!httpServer) httpServer = require('http').createServer()
+  //将HTTP服务器注入到WebSocket服务器
+  if (!socketServer) {
+    socketServer = require('socket.io')(httpServer, {
+      cors: {
+        origin: '*',
+      },
+    })
+    //指定HTTP的监听端口
+    socketServer.listen(5000)
+  }
 
-  ipcMain.handle('ping', (_, text) => {
-    IO.emit('b_message', text)
-    return 'pong'
+  // 启动本地服务
+  liveServer.start({
+    port: 9999, // Set the server port. Defaults to 8080.
+    host: '0.0.0.0', // Set the address to bind to. Defaults to 0.0.0.0 or process.env.IP.
+    // root: './dist-frontend',
+    root: app.isPackaged ? './resources/dist-frontend' : './dist-frontend', // Set root directory that's being served. Defaults to cwd.
+    open: true, // When false, it won't load your browser by default.
   })
-  // Test active push message to Renderer-process.
-  win.webContents.on('did-finish-load', () => {
-    win?.webContents.send('main-process-message', new Date().toLocaleString())
+
+  // 监听渲染层消息
+  ipcMain.handle('text_message', (_, text) => {
+    socketServer.emit('socket_message', text)
+    return 'got it'
   })
 
   if (VITE_DEV_SERVER_URL) {
@@ -54,7 +70,6 @@ function createWindow() {
     // win.loadFile('dist/index.html')
     win.loadFile(path.join(process.env.DIST, 'index.html'))
   }
-  win.setMenu(null)
 }
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -75,12 +90,24 @@ app.on('activate', () => {
   }
 })
 
-app.whenReady().then(createWindow)
-const params = {
-  port: 9999, // Set the server port. Defaults to 8080.
-  host: '0.0.0.0', // Set the address to bind to. Defaults to 0.0.0.0 or process.env.IP.
-  // root: './dist-frontend',
-  root: app.isPackaged ? './resources/dist-frontend' : './dist-frontend', // Set root directory that's being served. Defaults to cwd.
-  open: true, // When false, it won't load your browser by default.
-}
-liveServer.start(params)
+app.on('second-instance', () => {
+  // 如果主窗口存在，恢复并聚焦它
+  if (win) {
+    if (win.isMinimized()) win.restore()
+    win.focus()
+  }
+  // 处理第二个实例的命令行参数，例如打开一个文件
+  // 省略具体的处理逻辑
+})
+app.whenReady().then(() => {
+  // 尝试获取单实例锁
+  const gotTheLock = app.requestSingleInstanceLock()
+  // 如果获取失败，说明已经有一个实例在运行，直接退出
+  if (!gotTheLock) {
+    app.quit()
+  } else {
+    // 如果获取成功，创建主窗口
+    createWindow()
+  }
+})
+// 当第二个实例启动时

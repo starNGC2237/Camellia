@@ -8,7 +8,7 @@ onMounted(() => {
   socket.on('connect', () => {
     console.log('connected')
   })
-  socket.on('b_message', (data: any) => {
+  socket.on('socket_message', (data: any) => {
     console.log(data)
     message.value = data
   })

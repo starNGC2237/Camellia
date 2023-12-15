@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite",
     "dev_with_forntend": "cd ./frontend && pnpm run build && cd ../ && vite",
-    "build": "vue-tsc && vite build && electron-builder",
+    "build": "cd ./frontend && pnpm run build && cd ../ && vue-tsc && vite build && electron-builder",
     "build:win": "vue-tsc && vite build && electron-builder --win",
     "build:mac": "vue-tsc && vite build && electron-builder --mac",
     "build:linux": "vue-tsc && vite build && electron-builder --linux",
